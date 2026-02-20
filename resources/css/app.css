@@ -1,0 +1,32 @@
+/* Add to your app.css or create spreadsheet.css */
+.react-spreadsheet {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.react-spreadsheet td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    min-width: 100px;
+}
+
+.react-spreadsheet tr:first-child td {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+    border-bottom: 2px solid #adb5bd;
+}
+
+.react-spreadsheet input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+}
+
+.react-spreadsheet td:focus-within {
+    outline: 2px solid #0d6efd;
+    outline-offset: -1px;
+}
