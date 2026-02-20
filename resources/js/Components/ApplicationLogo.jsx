@@ -4,7 +4,7 @@ export default function ApplicationLogo(props) {
     return (
         <Image
             {...props}
-            src={"/storage/images/logo.png"}
+            src={"https://i.ibb.co/27GM3qQ3/ngcdf.png"}
         />
     );
 }

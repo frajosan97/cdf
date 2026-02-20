@@ -63,6 +63,7 @@ export default function Login({ status, canResetPassword }) {
                                     }
                                     isInvalid={!!errors.email}
                                     className="border-start-0 rounded-end-3"
+                                    required
                                 />
                                 <Form.Control.Feedback type="invalid">
                                     {errors.email}
@@ -93,6 +94,7 @@ export default function Login({ status, canResetPassword }) {
                                     }
                                     isInvalid={!!errors.password}
                                     className="border-start-0 rounded-end-3"
+                                    required
                                 />
                                 <Form.Control.Feedback type="invalid">
                                     {errors.password}
@@ -109,8 +111,9 @@ export default function Login({ status, canResetPassword }) {
                                     onChange={(e) =>
                                         setData("remember", e.target.checked)
                                     }
+                                    className="me-2"
                                 />
-                                <Form.Check.Label className="text-secondary">
+                                <Form.Check.Label className="text-secondary small">
                                     Remember me
                                 </Form.Check.Label>
                             </Form.Check>
