@@ -6,54 +6,270 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>NG-CDF Bursary Letter – Kitui Rural</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-        .letterhead {
+        /* mPDF requires inline styles - no external CSS */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 0;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        /* Letterhead styling */
+        .letterhead-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 0;
+            border: none;
         }
 
-        .letterhead img {
-            max-width: 150px;
-            height: auto;
-        }
-
-        .letterhead p {
-            margin: 0;
+        .letterhead-table td {
+            border: none;
+            vertical-align: middle;
             padding: 0;
+        }
+
+        .logo-cell {
+            width: 30%;
+            text-align: left;
+        }
+
+        .logo-cell img {
+            max-width: 140px;
+            height: auto;
+            display: block;
+        }
+
+        .contact-cell {
+            width: 70%;
+            text-align: right;
+        }
+
+        .contact-item {
+            margin: 2px 0;
+            padding: 0;
+            font-weight: bold;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        /* Border styling */
+        .border-container {
+            width: 100%;
+            margin: 5px 0 15px 0;
+        }
+
+        .border-thin {
+            border-bottom: 1px solid #000;
+            width: 100%;
+            margin: 0;
+        }
+
+        .border-thick {
+            border-bottom: 4px solid #000;
+            width: 100%;
+            margin: 2px 0 0 0;
+        }
+
+        /* Date styling */
+        .date-section {
+            text-align: right;
+            margin: 20px 0 25px 0;
+            font-weight: normal;
+        }
+
+        .date-text {
+            font-size: 16px;
+            margin: 0;
             font-weight: bold;
         }
 
-        .letterhead .left-content {
+        .address-section h4 {
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Subject line */
+        .subject-line {
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 16px;
+            margin: 15px 0 15px 0;
+            text-transform: uppercase;
+        }
+
+        /* Introduction paragraph */
+        .intro-paragraph {
+            text-align: justify;
+            line-height: 1.6;
+            margin: 15px 0 15px 0;
+        }
+
+        /* Table styling - Enhanced borders for mPDF */
+        .applicants-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #000;
+            margin: 15px 0 15px 0;
+            page-break-inside: auto;
+        }
+
+        .applicants-table thead {
+            display: table-header-group;
+        }
+
+        .applicants-table tbody {
+            display: table-row-group;
+        }
+
+        .applicants-table tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        .applicants-table th {
+            background-color: #f2f2f2;
+            border: 1.5px solid #000;
             text-align: left;
-            width: 30%;
+            font-weight: bold;
+            padding: 6px 4px;
+            background-color: #e6e6e6;
         }
 
-        .letterhead .right-content {
+        .applicants-table td {
+            border: 1.5px solid #000;
+            vertical-align: top;
+            padding: 4px;
+        }
+
+        .applicants-table tbody tr td:first-child {
+            text-align: center;
+            width: 8%;
+        }
+
+        .applicants-table tbody tr td:nth-child(2) {
+            width: 47%;
+        }
+
+        .applicants-table tbody tr td:nth-child(3) {
+            width: 25%;
+        }
+
+        .applicants-table tbody tr td:last-child {
+            width: 20%;
             text-align: right;
-            width: 70%;
+            font-weight: bold;
+            padding-right: 8px;
         }
 
-        .border-bottom-1 {
-            border-bottom: 1px solid black;
-            width: 100%;
-            margin: 1px 0;
+        /* Amount column in header */
+        .amount-header {
+            text-align: center;
         }
 
-        .border-bottom-5 {
-            border-bottom: 5px solid black;
-            width: 100%;
-            margin: 1px 0;
-        }
-
-        .date {
+        .amount-value {
             text-align: right;
-            margin-top: 20px;
         }
 
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Page break */
         .page-break {
             page-break-after: always;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Total row styling */
+        .total-row td {
+            font-weight: bold;
+            background-color: #f2f2f2 !important;
+            border-top: 2px solid #000;
+        }
+
+        .total-row td:last-child {
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        /* Signature section */
+        .signature-section {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+
+        .signature-section p {
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        .signature-section strong {
+            font-weight: bold;
+        }
+
+        .signature-line {
+            width: 250px;
+            border-bottom: 1px solid #000;
+            margin: 5px 0;
+        }
+
+        /* mPDF specific optimizations */
+        .no-break {
+            page-break-inside: avoid;
+        }
+
+        .keep-together {
+            page-break-inside: avoid;
+        }
+
+        /* Ensure tables don't break badly */
+        table {
+            page-break-inside: auto;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        /* Print optimization */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .applicants-table th {
+                background-color: #e6e6e6 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .total-row td {
+                background-color: #f2f2f2 !important;
+            }
+        }
+
+        /* mPDF background color fix */
+        .bg-light {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
@@ -61,85 +277,111 @@
 <body>
 
     @foreach($institutions as $institution)
-
-        <!-- Letterhead -->
-        <table class="table letterhead" style="border: none;">
+        <!-- Letterhead Section -->
+        <table class="letterhead-table" style="border: none;">
             <tr>
-                <td class="left-content" style="border: none;">
-                    <img src="{{ public_path('storage/images/logo.png') }}" alt="NGCDF Logo">
+                <td class="logo-cell" style="border: none;">
+                    <img src="https://i.ibb.co/27GM3qQ3/ngcdf.png" alt="NGCDF Logo" style="max-width: 140px;" />
                 </td>
-                <td class="right-content" style="border: none;">
-                    <p>National Government Constituencies Development Fund</p>
-                    <p>Kitui Rural Constituency</p>
-                    <p>P.O BOX 1422-90200</p>
-                    <p>Kitui-Kenya</p>
-                    <p>Office Contact: 0723636367</p>
-                    <p>Email: cdfkituirural@cdf.go.ke</p>
+                <td class="contact-cell" style="border: none;">
+                    <p class="contact-item">National Government Constituencies Development Fund</p>
+                    <p class="contact-item">Kitui Rural Constituency</p>
+                    <p class="contact-item">P.O. BOX 1422-90200</p>
+                    <p class="contact-item">Kitui-Kenya</p>
+                    <p class="contact-item">Office Contact: 0723 636 367</p>
+                    <p class="contact-item">Email: cdfkituirural@cdf.go.ke</p>
                 </td>
             </tr>
         </table>
 
-        <div class="border-bottom-1"></div>
-        <div class="border-bottom-5"></div>
+        <!-- Border Section -->
+        <div class="border-container">
+            <div class="border-thin"></div>
+            <div class="border-thick"></div>
+        </div>
 
-        <!-- Body -->
-        <h4 class="date">{{ settingInfo()->date }}</h4>
+        <!-- Date Section -->
+        <div class="date-section">
+            <span class="date-text">{{ $date ?? settingInfo()->date ?? now()->format('jS F, Y') }}</span>
+        </div>
 
-        <h4>{{ $institution->category === "secondary" ? 'THE PRINCIPAL' : 'THE FINANCE OFFICER' }},</h4>
-        <h4>{{ strtoupper($institution->name) }}</h4>
-        <h4><u>RE: NG-CDF KITUI RURAL BURSARY {{ settingInfo()->financialYear }} LIST OF BENEFICIARIES.</u></h4>
+        <!-- Address Section -->
+        <div class="address-section">
+            <h4>{{ $institution->category === "secondary" ? 'THE PRINCIPAL' : 'THE FINANCE OFFICER' }}</h4>
+            <h4>{{ strtoupper($institution->name) }}</h4>
+        </div>
 
-        <p style="text-align: justify;">
+        <!-- Subject Line -->
+        <div class="subject-line">
+            RE: NG-CDF KITUI RURAL BURSARY
+            {{ $financial_year ?? settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1) }} - LIST OF BENEFICIARIES
+        </div>
+
+        <!-- Introduction Paragraph -->
+        <div class="intro-paragraph">
             Enclosed herein, please find bursary cheque
             <strong>No. ................................</strong>
             of Ksh. <strong>{{ number_format($institution->applicants->sum('amount'), 2) }}</strong>
-            for the following No:
-            <strong>{{ $institution->applicants->count() }}
-                {{ $institution->applicants->count() > 1 ? 'beneficiaries' : 'beneficiary' }}</strong> in your institution.
-        </p>
+            for the following <strong>{{ $institution->applicants->count() }}
+                {{ $institution->applicants->count() > 1 ? 'beneficiaries' : 'beneficiary' }}</strong>
+            in your institution.
+        </div>
 
-        <!-- <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Applicant Name</th>
-                                                        <th>Ward</th>
-                                                        <th>Location</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @forelse($institution->applicants as $index => $applicant)
-                                                        <tr>
-                                                            <td>{{ $index + 1 }}</td>
-                                                            <td>{{ $applicant->name }}</td>
-                                                            <td>{{ $applicant->ward->name ?? '-' }}</td>
-                                                            <td>{{ $applicant->location->name ?? '-' }}</td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="4" class="text-center">No approved applicants</td>
-                                                        </tr>
-                                                    @endforelse
-                                                </tbody>
-                                            </table>
+        <!-- Applicants Table - Well Bordered -->
+        <table class="applicants-table" repeat_header="1" repeat_footer="1">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">S/NO.</th>
+                    <th>NAME OF BENEFICIARY</th>
+                    <th>REG / ADM NUMBER</th>
+                    <th class="amount-header">AMOUNT (KSH.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($institution->applicants as $index => $applicant)
+                    <tr>
+                        <td style="text-align: center;">{{ $index + 1 }}.</td>
+                        <td>{{ strtoupper($applicant->student_name) }}</td>
+                        <td>{{ $applicant->admission_number ?? '—' }}</td>
+                        <td style="text-align: right;">{{ number_format($applicant->amount ?? 0, 2) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">No approved applicants
+                            for this institution</td>
+                    </tr>
+                @endforelse
 
-                                            <br><br>
+                <!-- Total row -->
+                @if($institution->applicants->count() > 0)
+                    <tr class="total-row" style="background-color: #f2f2f2;">
+                        <td colspan="3" style="font-weight: bold;">TOTAL AMOUNT</td>
+                        <td style="text-align: right; font-weight: bold; padding-right: 8px;">
+                            {{ number_format($institution->applicants->sum('amount'), 2) }}
+                        </td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
 
-                                            <p>
-                                                Yours faithfully,
-                                            </p>
+        <!-- Signature Section -->
+        <div class="signature-section" style="margin-top: 40px;">
+            <p>Please acknowledge the receipt of this cheque</p>
+            <p>&nbsp;</p>
+            <p><strong>...................................................</strong></p>
+            <p><strong>EZEKIEL K. MWANGANGI</strong></p>
+            <p><strong>NG-CDF FUND ACCOUNT MANAGER</strong></p>
+            <p><strong>KITUI RURAL CONSTITUENCY</strong></p>
+        </div>
 
-                                            <br><br>
-
-                                            <p><strong>NG-CDF KITUI RURAL</strong></p> -->
-
-        {{-- Page break only if not last --}}
+        <!-- Page break only if not last - mPDF compatible -->
         @if(!$loop->last)
-            <div class="page-break"></div>
+            <div style="page-break-after: always; margin: 0; padding: 0;"></div>
         @endif
 
     @endforeach
 
+    <!-- mPDF footer will be added via controller -->
 </body>
 
 </html>

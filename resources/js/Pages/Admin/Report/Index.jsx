@@ -122,7 +122,7 @@ const Reports = ({ institutions, wards, locations, stats }) => {
         <AuthenticatedLayout>
             <Head title="Reports" />
 
-            <Container fluid className="py-4">
+            <Container fluid>
                 {/* Header Section */}
                 <Row className="mb-4">
                     <Col>
