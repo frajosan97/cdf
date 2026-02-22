@@ -26,7 +26,7 @@ class InstitutionTemplateExport implements FromArray, WithHeadings, WithStyles, 
     {
         return [
             'CATEGORY',
-            'INSTITUTION',
+            'NAME',
         ];
     }
 

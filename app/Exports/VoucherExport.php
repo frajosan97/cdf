@@ -277,7 +277,7 @@ class VoucherCategorySheet implements
                         $sheet->setCellValue('J' . $currentRow, strtoupper($applicant->parent_phone_number));
                         $sheet->setCellValue('K' . $currentRow, strtoupper($applicant->parent_id_number));
                         $sheet->setCellValue('L' . $currentRow, $applicant->amount);
-                        $sheet->setCellValue('M' . $currentRow, ''); // Empty for student rows
+                        $sheet->setCellValue('M' . $currentRow, '');
     
                         // Apply borders to cells
                         $sheet->getStyle('A' . $currentRow . ':M' . $currentRow)->applyFromArray([
