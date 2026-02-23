@@ -23,14 +23,12 @@ class ReportController extends Controller
     public function index()
     {
         try {
-            $institutions = Institution::where('is_active', true)->get(['id', 'name', 'code']);
-            $wards = Ward::withCount('applicants')->get(['id', 'name']);
-            $locations = Location::with('ward')->get(['id', 'name', 'ward_id']);
+            $wards = Ward::with('locations')
+                ->withCount('applicants')
+                ->get(['id', 'name']);
 
             return Inertia::render('Admin/Report/Index', [
-                'institutions' => $institutions,
                 'wards' => $wards,
-                'locations' => $locations,
                 'stats' => [
                     'total_approved' => Applicant::where('decision', 'approved')->count(),
                     'total_pending' => Applicant::where('decision', 'pending')->count(),
@@ -50,6 +48,10 @@ class ReportController extends Controller
     public function forwardingLetter(Request $request, $institution_id = null)
     {
         try {
+            // Increase PCRE limits to handle large HTML content
+            ini_set('pcre.backtrack_limit', '10000000'); // 10M
+            ini_set('pcre.recursion_limit', '10000000'); // 10M
+
             // Base query with approved applicants ordered alphabetically
             $query = Institution::with([
                 'applicants' => function ($q) {
@@ -81,8 +83,8 @@ class ReportController extends Controller
             // Add footer that appears on every page
             $mpdf->SetHTMLFooter($this->getFooterHtml());
 
-            // Write HTML to PDF
-            $mpdf->WriteHTML($html);
+            // Write HTML to PDF in chunks to avoid backtrack limit issues
+            $this->writeHtmlInChunks($mpdf, $html);
 
             // Output as string and encode
             $pdfContent = $mpdf->Output('', 'S');
@@ -106,6 +108,10 @@ class ReportController extends Controller
     public function previewForwardingLetter(Request $request)
     {
         try {
+            // Increase PCRE limits
+            ini_set('pcre.backtrack_limit', '10000000');
+            ini_set('pcre.recursion_limit', '10000000');
+
             $institutions = Institution::where('is_active', true)->get(['id', 'name', 'code']);
             $approvedApplicants = Applicant::with(['ward', 'location', 'institution'])
                 ->where('decision', 'approved')
@@ -135,8 +141,8 @@ class ReportController extends Controller
             // Add footer
             $mpdf->SetHTMLFooter($this->getFooterHtml());
 
-            // Write HTML to PDF
-            $mpdf->WriteHTML($html);
+            // Write HTML to PDF in chunks
+            $this->writeHtmlInChunks($mpdf, $html);
 
             // Output as string and encode
             $pdfContent = $mpdf->Output('', 'S');
@@ -188,6 +194,10 @@ class ReportController extends Controller
             $format = $request->get('format', 'excel');
 
             if ($format === 'pdf') {
+                // Increase PCRE limits
+                ini_set('pcre.backtrack_limit', '10000000');
+                ini_set('pcre.recursion_limit', '10000000');
+
                 $wards = Ward::with([
                     'locations',
                     'applicants' => function ($q) {
@@ -210,8 +220,8 @@ class ReportController extends Controller
                 // Add footer
                 $mpdf->SetHTMLFooter($this->getFooterHtml());
 
-                // Write HTML to PDF
-                $mpdf->WriteHTML($html);
+                // Write HTML to PDF in chunks
+                $this->writeHtmlInChunks($mpdf, $html);
 
                 $pdfContent = $mpdf->Output('', 'S');
 
@@ -247,6 +257,10 @@ class ReportController extends Controller
             $format = $request->get('format', 'excel');
 
             if ($format === 'pdf') {
+                // Increase PCRE limits
+                ini_set('pcre.backtrack_limit', '10000000');
+                ini_set('pcre.recursion_limit', '10000000');
+
                 $locations = Location::with([
                     'ward',
                     'applicants' => function ($q) {
@@ -269,8 +283,8 @@ class ReportController extends Controller
                 // Add footer
                 $mpdf->SetHTMLFooter($this->getFooterHtml());
 
-                // Write HTML to PDF
-                $mpdf->WriteHTML($html);
+                // Write HTML to PDF in chunks
+                $this->writeHtmlInChunks($mpdf, $html);
 
                 $pdfContent = $mpdf->Output('', 'S');
 
@@ -347,5 +361,69 @@ class ReportController extends Controller
     private function getFooterHtml()
     {
         return '<img src="https://i.ibb.co/HfWN0jC9/footer.png" alt="" style="width: 100%;">';
+    }
+
+    /**
+     * Write HTML in smaller chunks to avoid backtrack limit issues
+     * 
+     * @param \Mpdf\Mpdf $mpdf
+     * @param string $html
+     * @param int $chunkSize
+     */
+    private function writeHtmlInChunks($mpdf, $html, $chunkSize = 50000)
+    {
+        // Split HTML into chunks while preserving HTML tag integrity
+        $chunks = $this->splitHtmlPreserveTags($html, $chunkSize);
+
+        foreach ($chunks as $index => $chunk) {
+            // For the first chunk, use WriteHTML normally (mode 0)
+            // For subsequent chunks, use mode 1 to continue from where we left off
+            $mpdf->WriteHTML($chunk, ($index > 0) ? 1 : 0);
+        }
+    }
+
+    /**
+     * Split HTML while trying to keep tags intact
+     * 
+     * @param string $html
+     * @param int $chunkSize
+     * @return array
+     */
+    private function splitHtmlPreserveTags($html, $chunkSize)
+    {
+        $chunks = [];
+        $length = strlen($html);
+        $position = 0;
+
+        while ($position < $length) {
+            // Find a good breaking point (after a closing tag or at chunk size)
+            $chunkEnd = min($position + $chunkSize, $length);
+
+            // If not at the end, try to find a natural break point
+            if ($chunkEnd < $length) {
+                // Look for the next closing tag
+                $nextBreak = strpos($html, '>', $chunkEnd - 100);
+                if ($nextBreak !== false && $nextBreak < $chunkEnd + 100) {
+                    $chunkEnd = $nextBreak + 1;
+                } else {
+                    // Look for line break
+                    $nextBreak = strpos($html, "\n", $chunkEnd - 50);
+                    if ($nextBreak !== false && $nextBreak < $chunkEnd + 50) {
+                        $chunkEnd = $nextBreak + 1;
+                    } else {
+                        // Look for space as last resort
+                        $nextBreak = strpos($html, ' ', $chunkEnd - 30);
+                        if ($nextBreak !== false && $nextBreak < $chunkEnd + 30) {
+                            $chunkEnd = $nextBreak + 1;
+                        }
+                    }
+                }
+            }
+
+            $chunks[] = substr($html, $position, $chunkEnd - $position);
+            $position = $chunkEnd;
+        }
+
+        return $chunks;
     }
 }

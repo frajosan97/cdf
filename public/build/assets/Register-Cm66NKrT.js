@@ -1,1 +1,0 @@
-import{r as t,j as e,H as r}from"./app-BDdR8tlL.js";function i(){return t.useEffect(()=>{window.location.href=route("home")},[]),e.jsxs(e.Fragment,{children:[e.jsx(r,{title:"Register"}),e.jsx("div",{className:"text-center mt-5",children:e.jsx("p",{children:"No account registrations are accepted from public, Redirecting..."})})]})}export{i as default};

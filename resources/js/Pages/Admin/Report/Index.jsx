@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 
-const Reports = ({ institutions, wards, locations, stats }) => {
+const Reports = ({ wards, stats }) => {
     const [loading, setLoading] = useState(false);
 
     const reportCategories = [
@@ -31,77 +31,31 @@ const Reports = ({ institutions, wards, locations, stats }) => {
                         "Generate bursary vouchers for approved applicants",
                     formats: ["excel"],
                     action: "voucher",
+                    actionUrl: route("reports.voucher"),
                     color: "success",
                     icon: (
                         <FileEarmarkExcel className="text-success" size={20} />
                     ),
                 },
+            ],
+        },
+        {
+            title: "Forwarding Letters",
+            icon: <GeoAlt className="me-2" />,
+            color: "info",
+            reports: [
                 {
                     name: "Forwarding Letters",
                     description: "Official forwarding letters for institutions",
                     formats: ["pdf"],
                     action: "forwarding",
+                    actionUrl: route("reports.forwarding.letter"),
                     color: "danger",
                     icon: <FileEarmarkPdf className="text-danger" size={20} />,
                 },
             ],
         },
-        {
-            title: "Location Reports",
-            icon: <GeoAlt className="me-2" />,
-            color: "info",
-            reports: [
-                {
-                    name: "Wards List",
-                    description: "Complete list of all wards with statistics",
-                    formats: ["pdf", "excel"],
-                    action: "wards",
-                    color: "primary",
-                    icon: <Building className="text-primary" size={20} />,
-                },
-                {
-                    name: "Locations List",
-                    description:
-                        "Comprehensive list of all locations with statistics",
-                    formats: ["pdf", "excel"],
-                    action: "locations",
-                    color: "primary",
-                    icon: <GeoAlt className="text-primary" size={20} />,
-                },
-            ],
-        },
     ];
-
-    // In your Reports component, update the handleDownload function:
-    const handleDownload = (report, format) => {
-        setLoading(true);
-
-        if (report.action === "voucher") {
-            window.location.href = route("reports.voucher") + "?all=true";
-        } else if (report.action === "forwarding") {
-            // Navigate to forwarding letter page which will display PDF inline
-            router.get(route("reports.forwarding.letter"));
-        } else if (report.action === "wards") {
-            if (format === "pdf") {
-                // For PDF, navigate to viewer
-                router.get(route("reports.wards", { format, view: "inline" }));
-            } else {
-                window.location.href = route("reports.wards", { format });
-            }
-        } else if (report.action === "locations") {
-            if (format === "pdf") {
-                // For PDF, navigate to viewer
-                router.get(
-                    route("reports.locations", { format, view: "inline" }),
-                );
-            } else {
-                window.location.href = route("reports.locations", { format });
-            }
-        }
-
-        // Reset loading after a short delay
-        setTimeout(() => setLoading(false), 1000);
-    };
 
     const getFormatIcon = (format) => {
         switch (format) {
@@ -286,11 +240,8 @@ const Reports = ({ institutions, wards, locations, stats }) => {
                                                                             variant="outline-primary"
                                                                             size="sm"
                                                                             className="d-flex align-items-center gap-1 border"
-                                                                            onClick={() =>
-                                                                                handleDownload(
-                                                                                    report,
-                                                                                    format,
-                                                                                )
+                                                                            href={
+                                                                                report.actionUrl
                                                                             }
                                                                             disabled={
                                                                                 loading

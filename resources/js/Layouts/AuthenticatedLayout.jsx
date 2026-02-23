@@ -115,7 +115,7 @@ export default function AuthenticatedLayout({ header, children }) {
         },
         {
             name: "Settings",
-            href: "#",
+            href: "/settings",
             icon: Settings,
             badge: null,
             active: false,

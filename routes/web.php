@@ -40,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/wards', [ReportController::class, 'wardsList'])->name('wards');
         Route::get('/locations', [ReportController::class, 'locationsList'])->name('locations');
     });
+
+    Route::get('/settings', function () {
+        return Inertia::render('Admin/Setting');
+    })->name('settings');
 });
 
 require __DIR__ . '/auth.php';
