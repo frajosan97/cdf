@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NG-CDF Bursary Letter – Kitui Rural</title>
+    <title>NG-CDF Merit List – Kitui Rural</title>
     <style>
         /* mPDF requires inline styles - no external CSS */
         body {
@@ -31,7 +31,7 @@
         }
 
         .logo-cell {
-            width: 30%;
+            width: 25%;
             text-align: left;
         }
 
@@ -42,7 +42,7 @@
         }
 
         .contact-cell {
-            width: 70%;
+            width: 25%;
             text-align: right;
         }
 
@@ -52,6 +52,11 @@
             font-weight: bold;
             line-height: 1.4;
             font-size: 14px;
+        }
+
+        .title-cell {
+            width: 50%;
+            text-align: center;
         }
 
         /* Border styling */
@@ -274,114 +279,82 @@
 </head>
 
 <body>
+    <!-- Letterhead Section -->
+    <table class="letterhead-table" style="border: none;">
+        <tr>
+            <td class="logo-cell" style="border: none;">
+                <img src="https://i.ibb.co/27GM3qQ3/ngcdf.png" alt="NGCDF Logo" style="max-width: 140px;" />
+            </td>
+            <td class="title-cell" style="border: none;">
+                <h1>{{ $title }}</h1>
+                <h3>{{ $subtitle }}</h3>
+            </td>
+            <td class="contact-cell" style="border: none;">
+                <p class="contact-item">National Government Constituencies Development Fund</p>
+                <p class="contact-item">Kitui Rural Constituency</p>
+                <p class="contact-item">P.O. BOX 1422-90200</p>
+                <p class="contact-item">Kitui-Kenya</p>
+                <p class="contact-item">Office Contact: 0723 636 367</p>
+                <p class="contact-item">Email: cdfkituirural@cdf.go.ke</p>
+            </td>
+        </tr>
+    </table>
 
-    @foreach($institutions as $institution)
-        <!-- Letterhead Section -->
-        <table class="letterhead-table" style="border: none;">
+    <!-- Border Section -->
+    <div class="border-container">
+        <div class="border-thin"></div>
+        <div class="border-thick"></div>
+    </div>
+
+    <!-- Introduction Paragraph -->
+    <div class="intro-paragraph">
+        The following <strong>{{ count($applicants) }}</strong> applicants from
+        <strong>{{ $title }}</strong> successfully met all the minimum requirements
+        set by the NG-CDF Kitui Rural Board during the
+        <strong>{{ $financial_year }}</strong> bursary application process and have
+        therefore been approved as successful beneficiaries.
+    </div>
+
+    <!-- Applicants Table - Well Bordered -->
+    <table class="applicants-table" repeat_header="1" repeat_footer="1">
+        <thead>
             <tr>
-                <td class="logo-cell" style="border: none;">
-                    <img src="https://i.ibb.co/27GM3qQ3/ngcdf.png" alt="NGCDF Logo" style="max-width: 140px;" />
-                </td>
-                <td class="contact-cell" style="border: none;">
-                    <p class="contact-item">National Government Constituencies Development Fund</p>
-                    <p class="contact-item">Kitui Rural Constituency</p>
-                    <p class="contact-item">P.O. BOX 1422-90200</p>
-                    <p class="contact-item">Kitui-Kenya</p>
-                    <p class="contact-item">Office Contact: 0723 636 367</p>
-                    <p class="contact-item">Email: cdfkituirural@cdf.go.ke</p>
-                </td>
+                <th style="text-align: center;">S/NO</th>
+                <th>INSTITUTION</th>
+                <th>NAME OF STUDENT</th>
+                <th>REG / ADM</th>
+                <th class="amount-header">AMOUNT</th>
             </tr>
-        </table>
-
-        <!-- Border Section -->
-        <div class="border-container">
-            <div class="border-thin"></div>
-            <div class="border-thick"></div>
-        </div>
-
-        <!-- Date Section -->
-        <div class="date-section">
-            <span class="date-text">{{ $date ?? settingInfo()->date ?? now()->format('jS F, Y') }}</span>
-        </div>
-
-        <!-- Address Section -->
-        <div class="address-section">
-            <h4>{{ $institution->category === "secondary" ? 'THE PRINCIPAL' : 'THE FINANCE OFFICER' }}</h4>
-            <h4>{{ strtoupper($institution->name) }}</h4>
-        </div>
-
-        <!-- Subject Line -->
-        <div class="subject-line">
-            RE: NG-CDF KITUI RURAL BURSARY
-            {{ $financial_year ?? settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1) }} - LIST OF
-            BENEFICIARIES
-        </div>
-
-        <!-- Introduction Paragraph -->
-        <div class="intro-paragraph">
-            Enclosed herein, please find bursary cheque
-            <strong>No. ................................</strong>
-            of Ksh. <strong>{{ number_format($institution->applicants->sum('amount'), 2) }}</strong>
-            for the following <strong>{{ $institution->applicants->count() }}
-                {{ $institution->applicants->count() > 1 ? 'beneficiaries' : 'beneficiary' }}</strong>
-            in your institution.
-        </div>
-
-        <!-- Applicants Table - Well Bordered -->
-        <table class="applicants-table" repeat_header="1" repeat_footer="1">
-            <thead>
+        </thead>
+        <tbody>
+            @forelse($applicants as $index => $applicant)
                 <tr>
-                    <th style="text-align: center;">S/NO.</th>
-                    <th>NAME OF BENEFICIARY</th>
-                    <th>REG / ADM NUMBER</th>
-                    <th class="amount-header">AMOUNT (KSH.)</th>
+                    <td style="text-align: center;">{{ $index + 1 }}.</td>
+                    <td>{{ strtoupper($applicant->institution->name) }}</td>
+                    <td>{{ strtoupper($applicant->student_name) }}</td>
+                    <td>{{ $applicant->admission_number ?? '—' }}</td>
+                    <td style="text-align: right;">{{ number_format($applicant->amount ?? 0, 2) }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @forelse($institution->applicants as $index => $applicant)
-                    <tr>
-                        <td style="text-align: center;">{{ $index + 1 }}.</td>
-                        <td>{{ strtoupper($applicant->student_name) }}</td>
-                        <td>{{ $applicant->admission_number ?? '—' }}</td>
-                        <td style="text-align: right;">{{ number_format($applicant->amount ?? 0, 2) }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">No approved applicants
-                            for this institution</td>
-                    </tr>
-                @endforelse
+            @empty
+                <tr>
+                    <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">
+                        No approved applicants for {{ $title }}
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 
-                <!-- Total row -->
-                @if($institution->applicants->count() > 0)
-                    <tr class="total-row" style="background-color: #f2f2f2;">
-                        <td colspan="3" style="font-weight: bold;">TOTAL AMOUNT</td>
-                        <td style="text-align: right; font-weight: bold; padding-right: 8px;">
-                            {{ number_format($institution->applicants->sum('amount'), 2) }}
-                        </td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
-
-        <!-- Signature Section -->
-        <div class="signature-section" style="margin-top: 40px;">
-            <p>Please acknowledge the receipt of this cheque</p>
-            <p>&nbsp;</p>
-            <p><strong>...................................................</strong></p>
-            <p><strong>EZEKIEL K. MWANGANGI</strong></p>
-            <p><strong>NG-CDF FUND ACCOUNT MANAGER</strong></p>
-            <p><strong>KITUI RURAL CONSTITUENCY</strong></p>
-        </div>
-
-        <!-- Page break only if not last - mPDF compatible -->
-        @if(!$loop->last)
-            <div style="page-break-after: always; margin: 0; padding: 0;"></div>
-        @endif
-
-    @endforeach
-
-    <!-- mPDF footer will be added via controller -->
+    <!-- notes -->
+    <h4>Notes:</h4>
+    <ol>
+        <li>ID attached <strong>MUST</strong> be a voter in Kitui Rural Constituency</li>
+        <li>All required fields/Attachments (Institution, Student Name, Admission Number, Parent Phone and Parent ID)
+            <strong>MUST</strong> be filled
+        </li>
+        <li>Single applicant per parent ID (With an exception of Orphans & Special)</li>
+        <li>Any body who applied more than once was rejected</li>
+    </ol>
 </body>
 
 </html>

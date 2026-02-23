@@ -10,14 +10,11 @@ import {
     Alert,
     Spinner,
     Badge,
-    ButtonGroup,
 } from "react-bootstrap";
 import {
     FileEarmarkPdf,
     Download,
     Building,
-    ArrowLeft,
-    Eye,
     Printer,
     ArrowRepeat,
 } from "react-bootstrap-icons";
@@ -25,15 +22,7 @@ import { useState, useEffect, useMemo } from "react";
 import PdfViewer from "@/Components/PdfViewer";
 import Select from "react-select";
 
-const ForwardingLetter = ({
-    data,
-    pdf,
-    institutions,
-    approvedApplicants,
-    groupedApplicants,
-}) => {
-    // Get current institution from URL params if available
-    const { params } = usePage().props;
+const ForwardingLetter = ({ data, pdf, institutions }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const institutionIdFromUrl = urlParams.get("institution_id") || "all";
 

@@ -34,11 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/voucher', [ReportController::class, 'voucher'])->name('voucher');
-        Route::get('/forwarding', [ReportController::class, 'previewForwardingLetter'])->name('forwarding');
+
         Route::get('/forwarding/letter', [ReportController::class, 'forwardingLetter'])->name('forwarding.letter');
         Route::get('/forwarding/letter/{institution?}', [ReportController::class, 'forwardingLetter'])->name('institution.forwarding.letter');
-        Route::get('/wards', [ReportController::class, 'wardsList'])->name('wards');
-        Route::get('/locations', [ReportController::class, 'locationsList'])->name('locations');
+
+        Route::get('/merit-list', [ReportController::class, 'merit'])->name('merit-list');
     });
 
     Route::get('/settings', function () {

@@ -3,14 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exports\VoucherExport;
-use App\Exports\WardsExport;
-use App\Exports\LocationsExport;
 use App\Models\Applicant;
 use App\Models\Institution;
 use App\Models\Ward;
 use App\Models\Location;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,14 +20,12 @@ class ReportController extends Controller
     public function index()
     {
         try {
-            $institutions = Institution::where('is_active', true)->get(['id', 'name', 'code']);
-            $wards = Ward::withCount('applicants')->get(['id', 'name']);
-            $locations = Location::with('ward')->get(['id', 'name', 'ward_id']);
+            $wards = Ward::with('locations')
+                ->withCount('applicants')
+                ->get(['id', 'name']);
 
             return Inertia::render('Admin/Report/Index', [
-                'institutions' => $institutions,
                 'wards' => $wards,
-                'locations' => $locations,
                 'stats' => [
                     'total_approved' => Applicant::where('decision', 'approved')->count(),
                     'total_pending' => Applicant::where('decision', 'pending')->count(),
@@ -39,7 +34,108 @@ class ReportController extends Controller
                 ]
             ]);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
+            Log::error('Report Index Error: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+        }
+    }
+
+    /**
+     *  Generate merit lists
+     */
+    public function merit(Request $request)
+    {
+        ini_set('pcre.backtrack_limit', '10000000'); // 10M
+        ini_set('pcre.recursion_limit', '10000000'); // 10M
+
+        try {
+            $validated = $request->validate([
+                'id' => 'nullable|string',
+                'type' => 'required|string|in:constituency,ward,location',
+                'format' => 'required|string|in:pdf,excel',
+            ]);
+
+            if ($validated['format'] === 'excel') {
+                // generate excel
+            }
+
+            $query = Applicant::query()
+                ->select('applicants.*')
+                ->join(
+                    'institutions',
+                    'applicants.institution_id',
+                    '=',
+                    'institutions.id'
+                )
+                ->where('applicants.decision', 'approved')
+                ->with(['ward', 'location', 'institution'])
+                ->orderBy('institutions.name', 'asc')
+                ->orderBy('applicants.student_name', 'asc')
+                ->orderBy('applicants.admission_number', 'asc');
+
+            // Apply type-specific filters and get title/description
+            $title = '';
+            $subtitle = '';
+            $applicants = [];
+
+            switch ($validated['type']) {
+                case 'constituency':
+                    $title = 'KITUI RURAL CONSTITUENCY';
+                    $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
+                    $applicants = $query->get();
+                    break;
+
+                case 'ward':
+                    $ward = Ward::findOrFail($validated['id']);
+                    $query->where('ward_id', $validated['id']);
+                    $title = strtoupper($ward->name) . ' WARD';
+                    $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
+                    $applicants = $query->get();
+                    break;
+
+                case 'location':
+                    $location = Location::with('ward')->findOrFail($validated['id']);
+                    $query->where('location_id', $validated['id']);
+                    $title = strtoupper($location->name) . ' LOCATION';
+                    $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
+                    $applicants = $query->get();
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException('Invalid type specified');
+            }
+
+            $data = [
+                'title' => $title,
+                'subtitle' => $subtitle,
+                'applicants' => $applicants,
+                'date' => now()->format('jS F, Y'),
+                'financial_year' => settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1),
+            ];
+
+            // Load HTML view
+            $html = view('reports.merit-list', $data)->render();
+
+            // Configure mPDF with custom fonts and settings
+            $mpdf = $this->configureMpdf([
+                'orientation' => 'L',
+            ]);
+
+            // Add footer that appears on every page
+            $mpdf->SetHTMLFooter($this->getMeritListFooter());
+
+            // Write HTML to PDF
+            $mpdf->WriteHTML($html);
+
+            // Output as string and encode
+            $pdfContent = $mpdf->Output('', 'S');
+
+            return Inertia::render('Admin/Report/MeritList', [
+                'data' => $data,
+                'pdf' => base64_encode($pdfContent),
+                'wards' => Ward::with('locations')->get(['id', 'name']),
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Report Merit List Error: ' . $th->getMessage());
             return redirect()->back()->with('error', 'Something went wrong. Please try again.');
         }
     }
@@ -50,6 +146,9 @@ class ReportController extends Controller
     public function forwardingLetter(Request $request, $institution_id = null)
     {
         try {
+            ini_set('pcre.backtrack_limit', '10000000'); // 10M
+            ini_set('pcre.recursion_limit', '10000000'); // 10M
+
             // Base query with approved applicants ordered alphabetically
             $query = Institution::with([
                 'applicants' => function ($q) {
@@ -76,10 +175,13 @@ class ReportController extends Controller
             $html = view('reports.forwarding-letter', $data)->render();
 
             // Configure mPDF with custom fonts and settings
-            $mpdf = $this->configureMpdf();
+            $mpdf = $this->configureMpdf([
+                'margin_bottom' => 35,
+                'margin_footer' => 0
+            ]);
 
             // Add footer that appears on every page
-            $mpdf->SetHTMLFooter($this->getFooterHtml());
+            $mpdf->SetHTMLFooter($this->getForwardLetterFooter());
 
             // Write HTML to PDF
             $mpdf->WriteHTML($html);
@@ -97,61 +199,6 @@ class ReportController extends Controller
         } catch (\Throwable $th) {
             Log::error('Forwarding Letter Error: ' . $th->getMessage());
             return redirect()->back()->with('error', 'Failed to generate forwarding letter: ' . $th->getMessage());
-        }
-    }
-
-    /**
-     * Preview forwarding letter (now using mPDF)
-     */
-    public function previewForwardingLetter(Request $request)
-    {
-        try {
-            $institutions = Institution::where('is_active', true)->get(['id', 'name', 'code']);
-            $approvedApplicants = Applicant::with(['ward', 'location', 'institution'])
-                ->where('decision', 'approved')
-                ->orderBy('student_name', 'asc')
-                ->get();
-
-            // Group applicants by institution
-            $groupedApplicants = $approvedApplicants->groupBy('institution_id');
-
-            // Generate PDF for preview
-            $data = [
-                'applicants' => $approvedApplicants,
-                'groupedApplicants' => $groupedApplicants,
-                'institutions' => $institutions,
-                'date' => now()->format('jS F, Y'),
-                'financial_year' => settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1),
-                'reference' => 'KR/BURSARY/' . now()->year . '/' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT),
-                'type' => 'preview'
-            ];
-
-            // Load HTML view
-            $html = view('reports.forwarding-letter-preview', $data)->render();
-
-            // Configure mPDF
-            $mpdf = $this->configureMpdf();
-
-            // Add footer
-            $mpdf->SetHTMLFooter($this->getFooterHtml());
-
-            // Write HTML to PDF
-            $mpdf->WriteHTML($html);
-
-            // Output as string and encode
-            $pdfContent = $mpdf->Output('', 'S');
-
-            return Inertia::render('Admin/Report/ForwardingLetter', [
-                'institutions' => $institutions,
-                'approvedApplicants' => $approvedApplicants,
-                'groupedApplicants' => $groupedApplicants,
-                'pdf' => base64_encode($pdfContent),
-                'data' => $data
-            ]);
-
-        } catch (\Throwable $th) {
-            Log::error('Preview Forwarding Letter Error: ' . $th->getMessage());
-            return redirect()->back()->with('error', 'Failed to generate preview: ' . $th->getMessage());
         }
     }
 
@@ -180,127 +227,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate wards list (supports both Excel and PDF with mPDF)
-     */
-    public function wardsList(Request $request)
-    {
-        try {
-            $format = $request->get('format', 'excel');
-
-            if ($format === 'pdf') {
-                $wards = Ward::with([
-                    'locations',
-                    'applicants' => function ($q) {
-                        $q->where('decision', 'approved');
-                    }
-                ])->get();
-
-                $data = [
-                    'wards' => $wards,
-                    'title' => 'Wards List',
-                    'date' => now()->format('jS F, Y'),
-                ];
-
-                // Load HTML view
-                $html = view('reports.wards-list', $data)->render();
-
-                // Configure mPDF
-                $mpdf = $this->configureMpdf();
-
-                // Add footer
-                $mpdf->SetHTMLFooter($this->getFooterHtml());
-
-                // Write HTML to PDF
-                $mpdf->WriteHTML($html);
-
-                $pdfContent = $mpdf->Output('', 'S');
-
-                if ($request->get('view') === 'inline') {
-                    return Inertia::render('Admin/Report/PdfViewer', [
-                        'pdf' => base64_encode($pdfContent),
-                        'title' => 'Wards List'
-                    ]);
-                }
-
-                // For download
-                return response()->streamDownload(
-                    fn() => print ($pdfContent),
-                    'wards-list.pdf',
-                    ['Content-Type' => 'application/pdf']
-                );
-            }
-
-            return Excel::download(new WardsExport(), 'wards-list.xlsx');
-
-        } catch (\Throwable $th) {
-            Log::error('Wards List Error: ' . $th->getMessage());
-            return redirect()->back()->with('error', 'Failed to generate wards list: ' . $th->getMessage());
-        }
-    }
-
-    /**
-     * Generate locations list (supports both Excel and PDF with mPDF)
-     */
-    public function locationsList(Request $request)
-    {
-        try {
-            $format = $request->get('format', 'excel');
-
-            if ($format === 'pdf') {
-                $locations = Location::with([
-                    'ward',
-                    'applicants' => function ($q) {
-                        $q->where('decision', 'approved');
-                    }
-                ])->get();
-
-                $data = [
-                    'locations' => $locations,
-                    'title' => 'Locations List',
-                    'date' => now()->format('jS F, Y'),
-                ];
-
-                // Load HTML view
-                $html = view('reports.locations-list', $data)->render();
-
-                // Configure mPDF
-                $mpdf = $this->configureMpdf();
-
-                // Add footer
-                $mpdf->SetHTMLFooter($this->getFooterHtml());
-
-                // Write HTML to PDF
-                $mpdf->WriteHTML($html);
-
-                $pdfContent = $mpdf->Output('', 'S');
-
-                if ($request->get('view') === 'inline') {
-                    return Inertia::render('Admin/Report/PdfViewer', [
-                        'pdf' => base64_encode($pdfContent),
-                        'title' => 'Locations List'
-                    ]);
-                }
-
-                // For download
-                return response()->streamDownload(
-                    fn() => print ($pdfContent),
-                    'locations-list.pdf',
-                    ['Content-Type' => 'application/pdf']
-                );
-            }
-
-            return Excel::download(new LocationsExport(), 'locations-list.xlsx');
-
-        } catch (\Throwable $th) {
-            Log::error('Locations List Error: ' . $th->getMessage());
-            return redirect()->back()->with('error', 'Failed to generate locations list: ' . $th->getMessage());
-        }
-    }
-
-    /**
      * Configure mPDF with common settings
      */
-    private function configureMpdf()
+    private function configureMpdf($config = null)
     {
         // Default configuration
         $defaultConfig = (new ConfigVariables())->getDefaults();
@@ -313,8 +242,8 @@ class ReportController extends Controller
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
-            'margin_bottom' => 35,
-            'margin_footer' => 0,
+            'margin_bottom' => $config['margin_bottom'] ?? null,
+            'margin_footer' => $config['margin_footer'] ?? null,
             'fontDir' => array_merge($fontDirs, [
                 public_path('fonts'),
             ]),
@@ -327,7 +256,7 @@ class ReportController extends Controller
             ],
             'default_font' => 'times',
             'tempDir' => storage_path('app/temp/mpdf'),
-            'orientation' => 'P',
+            'orientation' => $config['orientation'] ?? 'P',
             'use_kwt' => true, // Keep with table
             'use_substitutions' => true,
             'shrink_tables_to_fit' => 1, // Shrink tables to fit on page
@@ -344,8 +273,27 @@ class ReportController extends Controller
     /**
      * Get standard footer HTML
      */
-    private function getFooterHtml()
+    private function getForwardLetterFooter()
     {
         return '<img src="https://i.ibb.co/HfWN0jC9/footer.png" alt="" style="width: 100%;">';
+    }
+
+    private function getMeritListFooter()
+    {
+        return '
+        <div class="border-container">
+            <div class="border-thick"></div>
+        </div>
+        <table width="100%">
+            <tr>
+                <td width="50%" style="text-align: left">
+                    <p style="margin: 0">Generated by NG-CDF Kitui Rural</p>
+                </td>
+                <td width="50%" style="text-align: right">
+                    <p style="margin: 0">Page {PAGENO}/{nbpg}</p>
+                </td>
+            </tr>
+        </table>
+        ';
     }
 }
