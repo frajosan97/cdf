@@ -108,8 +108,8 @@ class ReportController extends Controller
                 'title' => $title,
                 'subtitle' => $subtitle,
                 'applicants' => $applicants,
-                'date' => now()->format('jS F, Y'),
-                'financial_year' => settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1),
+                'date' => settingInfo()->date,
+                'financial_year' => settingInfo()->financialYear,
             ];
 
             // Load HTML view
@@ -167,8 +167,8 @@ class ReportController extends Controller
             $data = [
                 'institutions' => $institutions,
                 'type' => $institution_id ? 'single' : 'multiple',
-                'date' => now()->format('jS F, Y'),
-                'financial_year' => settingInfo()->financialYear ?? date('Y') . '/' . (date('Y') + 1),
+                'date' => settingInfo()->date,
+                'financial_year' => settingInfo()->financialYear,
             ];
 
             // Load HTML view
