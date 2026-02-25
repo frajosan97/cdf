@@ -186,7 +186,7 @@ if (!function_exists('settingInfo')) {
     {
         return (object) [
             'financialYear' => '2025/2026',
-            'date' => Carbon::parse('2026-02-03')->format('jS M, Y'),
+            'date' => Carbon::parse('2026-03-02')->format('jS M, Y'),
         ];
     }
 }
