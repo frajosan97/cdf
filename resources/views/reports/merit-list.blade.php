@@ -3,42 +3,47 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>NG-CDF Merit List – Kitui Rural</title>
+
     <style>
-        /* mPDF requires inline styles - no external CSS */
         body {
             font-family: "Times New Roman", Times, serif;
-            padding: 0;
             margin: 0;
+            padding: 0;
             font-size: 14px;
             line-height: 1.5;
             color: #000;
         }
 
-        /* Letterhead styling */
+        h1,
+        h3,
+        h4,
+        h5 {
+            margin: 3px 0;
+        }
+
+        /* LETTERHEAD */
         .letterhead-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 0;
-            border: none;
         }
 
         .letterhead-table td {
             border: none;
             vertical-align: middle;
-            padding: 0;
         }
 
         .logo-cell {
             width: 25%;
-            text-align: left;
         }
 
         .logo-cell img {
             max-width: 140px;
-            height: auto;
-            display: block;
+        }
+
+        .title-cell {
+            width: 50%;
+            text-align: center;
         }
 
         .contact-cell {
@@ -47,78 +52,35 @@
         }
 
         .contact-item {
-            margin: 2px 0;
-            padding: 0;
+            margin: 1px 0;
+            font-size: 13px;
             font-weight: bold;
-            line-height: 1.4;
-            font-size: 14px;
         }
 
-        .title-cell {
-            width: 50%;
-            text-align: center;
-        }
-
-        /* Border styling */
-        .border-container {
-            width: 100%;
-            margin: 5px 0 15px 0;
-        }
-
+        /* BORDER */
         .border-thin {
             border-bottom: 1px solid #000;
-            width: 100%;
-            margin: 0;
+            margin-top: 5px;
         }
 
         .border-thick {
             border-bottom: 4px solid #000;
-            width: 100%;
-            margin: 2px 0 0 0;
+            margin-top: 2px;
+            margin-bottom: 15px;
         }
 
-        /* Date styling */
-        .date-section {
-            text-align: right;
-            margin: 20px 0 25px 0;
-            font-weight: normal;
-        }
-
-        .date-text {
-            font-size: 16px;
-            margin: 0;
-            font-weight: bold;
-        }
-
-        .address-section h4 {
-            margin: 5px 0;
-            font-weight: bold;
-            font-size: 16px;
-            text-transform: uppercase;
-        }
-
-        /* Subject line */
-        .subject-line {
-            font-weight: bold;
-            text-decoration: underline;
-            font-size: 16px;
-            margin: 15px 0 15px 0;
-            text-transform: uppercase;
-        }
-
-        /* Introduction paragraph */
+        /* INTRO TEXT */
         .intro-paragraph {
+            margin: 12px 0;
             text-align: justify;
-            line-height: 1.6;
-            margin: 15px 0 15px 0;
         }
 
-        /* Table styling - Enhanced borders for mPDF */
+        /* TABLE */
         .applicants-table {
             width: 100%;
             border-collapse: collapse;
             border: 2px solid #000;
-            margin: 15px 0 15px 0;
+            margin-top: 10px;
             page-break-inside: auto;
         }
 
@@ -126,170 +88,79 @@
             display: table-header-group;
         }
 
-        .applicants-table tbody {
-            display: table-row-group;
-        }
-
         .applicants-table tr {
             page-break-inside: avoid;
-            page-break-after: auto;
         }
 
         .applicants-table th {
-            background-color: #f2f2f2;
+            background: #e6e6e6;
             border: 1.5px solid #000;
-            text-align: left;
             font-weight: bold;
             padding: 6px 4px;
-            background-color: #e6e6e6;
+            text-align: left;
         }
 
         .applicants-table td {
             border: 1.5px solid #000;
+            padding: 5px;
             vertical-align: top;
-            padding: 4px;
         }
 
-        .applicants-table tbody tr td:first-child {
-            text-align: center;
+        .sn {
             width: 8%;
+            text-align: right;
         }
 
-        .applicants-table tbody tr td:nth-child(2) {
-            width: 47%;
-        }
-
-        .applicants-table tbody tr td:nth-child(3) {
-            width: 25%;
-        }
-
-        .applicants-table tbody tr td:last-child {
-            width: 20%;
+        .amount {
             text-align: right;
             font-weight: bold;
             padding-right: 8px;
         }
 
-        /* Amount column in header */
-        .amount-header {
-            text-align: center;
+        .total-row td {
+            font-weight: bold;
+            background: #f2f2f2;
         }
 
-        .amount-value {
-            text-align: right;
-        }
-
-        /* Empty state styling */
         .empty-state {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             font-style: italic;
         }
 
-        /* Page break */
-        .page-break {
-            page-break-after: always;
-            margin: 0;
-            padding: 0;
+        .reject-reason {
+            color: #cc0000;
+            font-size: 12px;
+            margin-top: 2px;
         }
 
-        /* Total row styling */
-        .total-row td {
-            font-weight: bold;
-            background-color: #f2f2f2 !important;
-            border-top: 2px solid #000;
+        .notes {
+            margin-top: 25px;
         }
 
-        .total-row td:last-child {
-            text-align: right;
-            padding-right: 8px;
-        }
-
-        /* Signature section */
-        .signature-section {
-            margin-top: 40px;
-            page-break-inside: avoid;
-        }
-
-        .signature-section p {
-            margin: 0;
-            line-height: 1.8;
-        }
-
-        .signature-section strong {
-            font-weight: bold;
-        }
-
-        .signature-line {
-            width: 250px;
-            border-bottom: 1px solid #000;
-            margin: 5px 0;
-        }
-
-        /* mPDF specific optimizations */
-        .no-break {
-            page-break-inside: avoid;
-        }
-
-        .keep-together {
-            page-break-inside: avoid;
-        }
-
-        /* Ensure tables don't break badly */
-        table {
-            page-break-inside: auto;
-        }
-
-        tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-        }
-
-        thead {
-            display: table-header-group;
-        }
-
-        tfoot {
-            display: table-footer-group;
-        }
-
-        /* Print optimization */
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-
-            .applicants-table th {
-                background-color: #e6e6e6 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .total-row td {
-                background-color: #f2f2f2 !important;
-            }
-        }
-
-        /* mPDF background color fix */
-        .bg-light {
-            background-color: #f2f2f2;
+        ol {
+            margin-top: 5px;
         }
     </style>
+
 </head>
 
 <body>
-    <!-- Letterhead Section -->
-    <table class="letterhead-table" style="border: none;">
+
+    <!-- LETTERHEAD -->
+    <table class="letterhead-table">
         <tr>
-            <td class="logo-cell" style="border: none;">
-                <img src="https://i.ibb.co/27GM3qQ3/ngcdf.png" alt="NGCDF Logo" style="max-width: 140px;" />
+            <td class="logo-cell">
+                <img src="https://i.ibb.co/27GM3qQ3/ngcdf.png">
             </td>
-            <td class="title-cell" style="border: none;">
+
+            <td class="title-cell">
+                <h1>KITUI RURAL CONSTITUENCY</h1>
                 <h1>{{ $title }}</h1>
-                <h3>{{ $subtitle }}</h3>
+                <h3>APPLICANTS MERIT LIST</h3>
             </td>
-            <td class="contact-cell" style="border: none;">
+
+            <td class="contact-cell">
                 <p class="contact-item">National Government Constituencies Development Fund</p>
                 <p class="contact-item">Kitui Rural Constituency</p>
                 <p class="contact-item">P.O. BOX 1422-90200</p>
@@ -300,105 +171,170 @@
         </tr>
     </table>
 
-    <!-- Border Section -->
-    <div class="border-container">
-        <div class="border-thin"></div>
-        <div class="border-thick"></div>
-    </div>
+    <div class="border-thin"></div>
+    <div class="border-thick"></div>
 
-    <!-- Introduction Paragraph -->
+    <!-- APPROVED INTRO -->
     <div class="intro-paragraph">
         The following <strong>{{ count($applicants['approved']) }}</strong> applicants from
-        <strong>{{ $title }}</strong> successfully met all the minimum requirements
-        set by the NG-CDF Kitui Rural Board during the
+        <strong>{{ $title }}</strong> met all the minimum requirements set by
+        the NG-CDF Kitui Rural Board during the
         <strong>{{ $financial_year }}</strong> bursary application process and have
-        therefore been <strong>APPROVED</strong> as <strong>SUCCESSFULL</strong> beneficiaries.
+        therefore been <strong>APPROVED</strong> as <strong>SUCCESSFUL</strong> beneficiaries.
     </div>
 
-    <!-- Applicants Table - Well Bordered -->
-    <table class="applicants-table" repeat_header="1" repeat_footer="1">
+    <!-- APPROVED TABLE -->
+    <table class="applicants-table">
+
         <thead>
             <tr>
-                <th style="text-align: center;">S/NO</th>
-                <th>INSTITUTION</th>
-                <th>NAME OF STUDENT</th>
-                <th>REG / ADM</th>
-                <th class="amount-header">AMOUNT</th>
+                <th class="sn">S/NO</th>
+                <th class="institution">INSTITUTION</th>
+                <th class="student">NAME OF STUDENT</th>
+                <th class="reg">REG / ADM</th>
+                <th class="amount">AMOUNT</th>
             </tr>
         </thead>
+
         <tbody>
+
             @forelse($applicants['approved'] as $index => $applicant)
+
                 <tr>
-                    <td style="text-align: center;">{{ $index + 1 }}.</td>
-                    <td>{{ strtoupper($applicant->institution->name) }}</td>
-                    <td>{{ strtoupper($applicant->student_name) }}</td>
-                    <td>{{ $applicant->admission_number ?? '—' }}</td>
-                    <td style="text-align: right;">{{ number_format($applicant->amount ?? 0, 2) }}</td>
+                    <td class="sn">{{ $index + 1 }}</td>
+
+                    <td class="institution">
+                        {{ strtoupper($applicant->institution->name) }}
+                    </td>
+
+                    <td class="student">
+                        {{ strtoupper($applicant->student_name) }}
+                    </td>
+
+                    <td class="reg">
+                        {{ $applicant->admission_number ?? '—' }}
+                    </td>
+
+                    <td class="amount">
+                        {{ number_format($applicant->amount ?? 0, 2) }}
+                    </td>
                 </tr>
+
             @empty
+
                 <tr>
-                    <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">
+                    <td colspan="5" class="empty-state">
                         No approved applicants for {{ $title }}
                     </td>
                 </tr>
+
             @endforelse
+
+            @if(count($applicants['approved']) > 0)
+
+                <tr class="total-row">
+                    <td colspan="4">TOTAL APPROVED AMOUNT</td>
+                    <td class="amount">
+                        {{ number_format($applicants['approved']->sum('amount'), 2) }}
+                    </td>
+                </tr>
+
+            @endif
+
         </tbody>
+
     </table>
 
+    <!-- REJECTED SECTION -->
     @if (count($applicants['rejected']) > 0)
+
+        <div style="page-break-before: always;"></div>
+
         <div class="intro-paragraph">
             The following <strong>{{ count($applicants['rejected']) }}</strong> applicants from
             <strong>{{ $title }}</strong> did not meet all the minimum requirements
             set by the NG-CDF Kitui Rural Board during the
             <strong>{{ $financial_year }}</strong> bursary application process and have
-            therefore been <strong>REJECTED</strong> hence <strong>UNSUCCESSFULL</strong>.
+            therefore been <strong>REJECTED</strong> hence <strong>UNSUCCESSFUL</strong>.
         </div>
 
-        <table class="applicants-table" repeat_header="1" repeat_footer="1">
+        <table class="applicants-table">
+
             <thead>
                 <tr>
-                    <th style="text-align: center;">S/NO</th>
-                    <th>INSTITUTION</th>
-                    <th>NAME OF STUDENT</th>
-                    <th>REG / ADM</th>
+                    <th class="sn">S/NO</th>
+                    <th class="institution">INSTITUTION</th>
+                    <th class="student">NAME OF STUDENT</th>
+                    <th class="reg">REG / ADM</th>
                 </tr>
             </thead>
+
             <tbody>
-                @forelse($applicants['rejected'] as $index => $applicant)
+
+                @foreach($applicants['rejected'] as $index => $applicant)
+
                     <tr>
-                        <td style="text-align: center;">{{ $index + 1 }}.</td>
-                        <td>
+
+                        <td class="sn">{{ $index + 1 }}</td>
+
+                        <td class="institution">
                             {{ strtoupper($applicant->institution->name) }}
-                            <p style="color: #ff0000;">{{ $applicant->decision_reason }}</p>
+
+                            @if($applicant->decision_reason)
+                                <div class="reject-reason">
+                                    {{ $applicant->decision_reason }}
+                                </div>
+                            @endif
                         </td>
-                        <td>{{ strtoupper($applicant->student_name) }}</td>
-                        <td>{{ $applicant->admission_number ?? '—' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">
-                            No rejected applicants for {{ $title }}
+
+                        <td class="student">
+                            {{ strtoupper($applicant->student_name) }}
                         </td>
+
+                        <td class="reg">
+                            {{ $applicant->admission_number ?? '—' }}
+                        </td>
+
                     </tr>
-                @endforelse
+
+                @endforeach
+
             </tbody>
+
         </table>
+
     @endif
 
-    <!-- notes -->
-    <h4>Notes:</h4>
-    <ol>
-        <li>ID attached <strong>MUST</strong> be a voter in Kitui Rural Constituency</li>
-        <li>All required fields/Attachments (Institution, Student Name, Admission Number, Parent Phone and Parent ID)
-            <strong>MUST</strong> be filled
-        </li>
-        <li>Single applicant per parent ID (With an exception of Orphans & Special)</li>
-        <li>Any body who applied more than once was rejected</li>
-    </ol>
-    <p class="m-0">
-    <h5>Check your application status online through:</h5>
-    <a href="https://cdf.frajosantech.co.ke/verify">https://cdf.frajosantech.co.ke/verify</a>
-    </p>
+    <!-- NOTES -->
+    <div class="notes">
+
+        <h4>Notes:</h4>
+
+        <ol>
+            <li>ID attached <strong>MUST</strong> be a voter in Kitui Rural Constituency</li>
+
+            <li>
+                All required fields/Attachments (Institution, Student Name,
+                Admission Number, Parent Phone and Parent ID)
+                <strong>MUST</strong> be filled
+            </li>
+
+            <li>
+                Single applicant per parent ID
+                (With an exception of Orphans & Special)
+            </li>
+
+            <li>
+                Anybody who applied more than once was rejected
+            </li>
+        </ol>
+
+        <h5>Check your application status online:</h5>
+
+        <a href="https://cdf.frajosantech.co.ke/verify">https://cdf.frajosantech.co.ke/verify</a>
+
+    </div>
+
 </body>
 
 </html>
