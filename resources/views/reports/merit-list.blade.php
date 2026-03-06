@@ -355,6 +355,10 @@
         <li>Single applicant per parent ID (With an exception of Orphans & Special)</li>
         <li>Any body who applied more than once was rejected</li>
     </ol>
+    <p class="m-0">
+    <h6>Check your application status online through:</h6>
+    <a href="https://cdf.frajosantech.co.ke/verify">https://cdf.frajosantech.co.ke/verify</a>
+    </p>
 </body>
 
 </html>
