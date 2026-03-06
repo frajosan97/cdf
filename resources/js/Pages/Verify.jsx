@@ -12,7 +12,7 @@ import {
     Alert,
     Button,
 } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     FaSearch,
     FaUserGraduate,
@@ -304,12 +304,12 @@ const Verify = ({ institutions = [] }) => {
                                 </Col>
                             )}
 
-                            {student.decision === "rejected" && (
+                            {student.decision_reason && (
                                 <Col sm={12} className="mt-2">
                                     <hr />
                                     <div>
                                         <strong>Reason:</strong>{" "}
-                                        {student.reason}
+                                        {student.decision_reason}
                                     </div>
                                 </Col>
                             )}
@@ -358,9 +358,9 @@ const Verify = ({ institutions = [] }) => {
                             >
                                 {student.decision || "Pending"}
                             </Badge>
-                            {student.decision === "rejected" && (
+                            {student.decision_reason && (
                                 <p className="m-0 text-danger">
-                                    {student.reason}
+                                    {student.decision_reason}
                                 </p>
                             )}
                         </td>

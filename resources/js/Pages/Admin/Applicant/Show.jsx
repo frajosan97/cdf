@@ -421,16 +421,11 @@ const ShowApplicant = ({ applicant }) => {
                                 </Card.Header>
                                 <Card.Body>
                                     <Row>
-                                        <Col md={6}>
+                                        <Col md={12}>
                                             <Table borderless size="sm">
                                                 <tbody>
                                                     <tr>
-                                                        <td
-                                                            className="text-muted"
-                                                            style={{
-                                                                width: "40%",
-                                                            }}
-                                                        >
+                                                        <td className="text-muted">
                                                             Decision:
                                                         </td>
                                                         <td className="fw-semibold">
@@ -439,31 +434,18 @@ const ShowApplicant = ({ applicant }) => {
                                                             )}
                                                         </td>
                                                     </tr>
+                                                    <tr>
+                                                        <td className="text-muted">
+                                                            Reason:
+                                                        </td>
+                                                        <td className="fw-semibold">
+                                                            {
+                                                                applicant.decision_reason
+                                                            }
+                                                        </td>
+                                                    </tr>
                                                 </tbody>
                                             </Table>
-                                        </Col>
-                                        <Col md={6}>
-                                            {applicant.decision_reason && (
-                                                <Table borderless size="sm">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                className="text-muted"
-                                                                style={{
-                                                                    width: "40%",
-                                                                }}
-                                                            >
-                                                                Reason:
-                                                            </td>
-                                                            <td className="fw-semibold">
-                                                                {
-                                                                    applicant.decision_reason
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </Table>
-                                            )}
                                         </Col>
                                     </Row>
                                 </Card.Body>
