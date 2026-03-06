@@ -312,7 +312,7 @@
         <strong>{{ $title }}</strong> successfully met all the minimum requirements
         set by the NG-CDF Kitui Rural Board during the
         <strong>{{ $financial_year }}</strong> bursary application process and have
-        therefore been approved as successful beneficiaries.
+        therefore been <strong>APPROVED</strong> as <strong>SUCCESSFULL</strong> beneficiaries.
     </div>
 
     <!-- Applicants Table - Well Bordered -->
@@ -351,7 +351,7 @@
             <strong>{{ $title }}</strong> did not meet all the minimum requirements
             set by the NG-CDF Kitui Rural Board during the
             <strong>{{ $financial_year }}</strong> bursary application process and have
-            therefore been rejected hence unsuccessfull.
+            therefore been <strong>REJECTED</strong> hence <strong>UNSUCCESSFULL</strong>.
         </div>
 
         <table class="applicants-table" repeat_header="1" repeat_footer="1">
