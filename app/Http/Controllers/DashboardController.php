@@ -14,6 +14,10 @@ class DashboardController extends Controller
         // ==============================
         // General Stats Cards
         // ==============================
+        $totalApplicants = Applicant::count();
+        $successFullApplicants = Applicant::where('decision', 'approved')->count();
+        $unsuccessFullApplicants = Applicant::where('decision', 'rejected')->count();
+
         $statsCards = [
             [
                 'title' => 'Institutions',
@@ -25,11 +29,13 @@ class DashboardController extends Controller
             ],
             [
                 'title' => 'Applicants',
-                'value' => number_format(Applicant::count()),
-                'icon' => '👤',
+                'value' => number_format($totalApplicants),
+                'icon' => '👥',
                 'link' => route('applicant.index'),
                 'color' => 'info',
-                'description' => 'Registered applicants',
+                'description' =>
+                    '<p class="m-0 p-0 text-success">✅ Successful: ' . number_format($successFullApplicants) . '</p> 
+                    <p class="m-0 p-0 text-danger">❌ Unsuccessful: ' . number_format($unsuccessFullApplicants) . '</p>',
             ],
             [
                 'title' => 'Voters',

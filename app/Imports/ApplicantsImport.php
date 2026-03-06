@@ -94,16 +94,31 @@ class ApplicantsImport implements
                         'amount' => !empty($row['amount']) ? floatval($row['amount']) : null,
                     ];
 
-                    if ($existingApplicant) {
-                        // Update existing applicant
-                        $existingApplicant->update($applicantData);
-                        Log::info("Updated existing applicant: {$row['admission_number']}");
-                    } else {
-                        // Create new applicant with pending decision
-                        $applicantData['decision'] = 'pending';
-                        Applicant::create($applicantData);
-                        // Log::info("Created new applicant: {$row['admission_number']}");
+                    // Add DECISION if present (optional)
+                    if (!empty($row['decision'])) {
+                        $applicantData['decision'] = strtolower(trim($row['decision']));
                     }
+
+                    // Add DECISION REASON if present (optional)
+                    if (!empty($row['decision_reason'])) {
+                        $applicantData['decision_reason'] = trim($row['decision_reason']);
+                    }
+
+                    // if ($existingApplicant) {
+                    //     // Update existing applicant
+                    //     $existingApplicant->update($applicantData);
+                    //     // Log::info("Updated existing applicant: {$row['admission_number']}");
+                    // } else {
+                    //     // Create new applicant with pending decision if not specified
+                    //     if (!isset($applicantData['decision'])) {
+                    //         $applicantData['decision'] = 'pending';
+                    //     }
+                    //     Applicant::create($applicantData);
+                    //     // Log::info("Created new applicant: {$row['admission_number']}");
+                    // }
+
+                    // Create new applicant
+                    Applicant::create($applicantData);
 
                     $this->importedCount++;
 
@@ -186,6 +201,15 @@ class ApplicantsImport implements
 
         if (!in_array(trim($data['parent_status']), $validStatuses)) {
             $errors[] = "The selected Parent Status is invalid. Valid statuses are: " . implode(', ', config('app.parent_statuses', []));
+        }
+
+        // Optional DECISION validation (if provided)
+        if (!empty($data['decision'])) {
+            $validDecisions = ['pending', 'approved', 'rejected', 'waiting_list', 'processing'];
+            $decision = strtolower(trim($data['decision']));
+            if (!in_array($decision, $validDecisions)) {
+                $errors[] = "The DECISION value '{$data['decision']}' is invalid. Valid options are: " . implode(', ', $validDecisions);
+            }
         }
 
         return [
@@ -314,6 +338,8 @@ class ApplicantsImport implements
             'parent_phone' => 'Parent Phone',
             'parent_id' => 'Parent ID Number',
             'amount' => 'Amount',
+            'decision' => 'Decision',
+            'decision_reason' => 'Decision Reason',
         ];
     }
 

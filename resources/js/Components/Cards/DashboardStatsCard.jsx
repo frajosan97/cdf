@@ -32,7 +32,7 @@ const DashboardStatsCard = ({
             </div>
         </Card.Body>
         <Card.Footer className="text-muted border-top-0">
-            {description}
+            <div dangerouslySetInnerHTML={{ __html: description }} />
         </Card.Footer>
     </Card>
 );

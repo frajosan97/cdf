@@ -57,7 +57,7 @@ export default function Dashboard({ dashboardData }) {
                 {/* Stats Cards */}
                 <Row className="g-3 mb-4">
                     {statsCards.map((stat, index) => (
-                        <Col key={index} xs={12} sm={6} lg={3}>
+                        <Col key={index} xs={12} md={3}>
                             <DashboardStatsCard {...stat} />
                         </Col>
                     ))}
