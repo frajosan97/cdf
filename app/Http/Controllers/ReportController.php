@@ -58,15 +58,24 @@ class ReportController extends Controller
                 // generate excel
             }
 
+            // $query = Applicant::query()
+            //     ->select('applicants.*')
+            //     ->join(
+            //         'institutions',
+            //         'applicants.institution_id',
+            //         '=',
+            //         'institutions.id'
+            //     )
+            //     ->where('applicants.decision', 'approved')
+            //     ->with(['ward', 'location', 'institution'])
+            //     ->orderBy('institutions.name', 'asc')
+            //     ->orderBy('applicants.student_name', 'asc')
+            //     ->orderBy('applicants.admission_number', 'asc');
+
             $query = Applicant::query()
                 ->select('applicants.*')
-                ->join(
-                    'institutions',
-                    'applicants.institution_id',
-                    '=',
-                    'institutions.id'
-                )
-                ->where('applicants.decision', 'approved')
+                ->join('institutions', 'applicants.institution_id', '=', 'institutions.id')
+                ->whereIn('applicants.decision', ['approved', 'rejected'])
                 ->with(['ward', 'location', 'institution'])
                 ->orderBy('institutions.name', 'asc')
                 ->orderBy('applicants.student_name', 'asc')
@@ -75,34 +84,41 @@ class ReportController extends Controller
             // Apply type-specific filters and get title/description
             $title = '';
             $subtitle = '';
-            $applicants = [];
+            $applicants = collect();
 
             switch ($validated['type']) {
+
                 case 'constituency':
                     $title = 'KITUI RURAL CONSTITUENCY';
                     $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
-                    $applicants = $query->get();
                     break;
 
                 case 'ward':
                     $ward = Ward::findOrFail($validated['id']);
+
                     $query->where('ward_id', $validated['id']);
+
                     $title = strtoupper($ward->name) . ' WARD';
                     $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
-                    $applicants = $query->get();
                     break;
 
                 case 'location':
                     $location = Location::with('ward')->findOrFail($validated['id']);
+
                     $query->where('location_id', $validated['id']);
+
                     $title = strtoupper($location->name) . ' LOCATION';
                     $subtitle = 'SUCCESSFULL APPLICANTS MERIT LIST';
-                    $applicants = $query->get();
                     break;
 
                 default:
                     throw new \InvalidArgumentException('Invalid type specified');
             }
+
+            // Execute query and group by decision
+            $applicants = $query
+                ->get()
+                ->groupBy('decision');
 
             $data = [
                 'title' => $title,

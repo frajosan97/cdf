@@ -308,7 +308,7 @@
 
     <!-- Introduction Paragraph -->
     <div class="intro-paragraph">
-        The following <strong>{{ count($applicants) }}</strong> applicants from
+        The following <strong>{{ count($applicants['approved']) }}</strong> applicants from
         <strong>{{ $title }}</strong> successfully met all the minimum requirements
         set by the NG-CDF Kitui Rural Board during the
         <strong>{{ $financial_year }}</strong> bursary application process and have
@@ -327,7 +327,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($applicants as $index => $applicant)
+            @forelse($applicants['approved'] as $index => $applicant)
                 <tr>
                     <td style="text-align: center;">{{ $index + 1 }}.</td>
                     <td>{{ strtoupper($applicant->institution->name) }}</td>
@@ -345,6 +345,46 @@
         </tbody>
     </table>
 
+    @if (count($applicants['rejected']) > 0)
+        <div class="intro-paragraph">
+            The following <strong>{{ count($applicants['rejected']) }}</strong> applicants from
+            <strong>{{ $title }}</strong> did not meet all the minimum requirements
+            set by the NG-CDF Kitui Rural Board during the
+            <strong>{{ $financial_year }}</strong> bursary application process and have
+            therefore been rejected hence unsuccessfull.
+        </div>
+
+        <table class="applicants-table" repeat_header="1" repeat_footer="1">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">S/NO</th>
+                    <th>INSTITUTION</th>
+                    <th>NAME OF STUDENT</th>
+                    <th>REG / ADM</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($applicants['rejected'] as $index => $applicant)
+                    <tr>
+                        <td style="text-align: center;">{{ $index + 1 }}.</td>
+                        <td>
+                            {{ strtoupper($applicant->institution->name) }}
+                            <p style="color: #ff0000;">{{ $applicant->decision_reason }}</p>
+                        </td>
+                        <td>{{ strtoupper($applicant->student_name) }}</td>
+                        <td>{{ $applicant->admission_number ?? '—' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="empty-state" style="text-align: center; padding: 20px;">
+                            No rejected applicants for {{ $title }}
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
+
     <!-- notes -->
     <h4>Notes:</h4>
     <ol>
@@ -356,7 +396,7 @@
         <li>Any body who applied more than once was rejected</li>
     </ol>
     <p class="m-0">
-    <h6>Check your application status online through:</h6>
+    <h5>Check your application status online through:</h5>
     <a href="https://cdf.frajosantech.co.ke/verify">https://cdf.frajosantech.co.ke/verify</a>
     </p>
 </body>
